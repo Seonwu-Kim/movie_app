@@ -1,63 +1,52 @@
-import PropTypes from "prop-types";
+import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-const foodILike = [
-  {
-    id: 1,
-    name: "Kimchi",
-    picture:
-      "https://www.maangchi.com/wp-content/uploads/2019/11/vegetarian-kimchi.jpg",
-    rating: 5.0,
-  },
-  {
-    id: 2,
-    name: "ramen",
-    picture: "https://i.ytimg.com/vi/yfEUwNQTXwU/maxresdefault.jpg",
-    rating: 4.5,
-  },
-  {
-    id: 3,
-    name: "GoGi",
-    picture:
-      "https://aeonmall-long-bien-en.com/wp-content/uploads/2019/09/gogihouse1-1-750x468.jpg",
-    rating: 3.0,
-  },
-  {
-    id: 4,
-    name: "Chukumi",
-    picture: "https://blogthatcake.files.wordpress.com/2013/08/113.jpg",
-    rating: 2.0,
-  },
-];
-
-function Food({ name, picture, rating }) {
-  return (
-    <div>
-      <h2>I like {name}</h2>
-      <h4>{rating}/5.0</h4>
-      <img src={picture} alt={name} />
-    </div>
-  );
-}
-
-Food.propTypes = {
-  name: PropTypes.string.isRequired,
-  picture: PropTypes.string.isRequired,
-  rating: PropTypes.number.isRequired,
-};
-
-function App() {
-  return (
-    <div>
-      {foodILike.map((dish) => (
-        <Food
-          key={dish.id}
-          name={dish.name}
-          picture={dish.picture}
-          rating={dish.rating}
-        />
-      ))}
-    </div>
-  );
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.nomadcoders1.now.sh/list_movies.json"
+    );
+    this.setState({ movies, isLoading: false });
+  };
+  componentDidMount() {
+    this.getMovies();
+  }
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section className="contatiner">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
 }
 
 export default App;
